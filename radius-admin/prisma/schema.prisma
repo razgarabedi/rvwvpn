@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// FreeRADIUS User Credentials and Attributes
+model RadCheck {
+  id        Int    @id @default(autoincrement())
+  username  String
+  attribute String @default("Cleartext-Password")
+  op        String @default(":=")
+  value     String
+
+  @@unique([username, attribute])
+}
+
+// FreeRADIUS Group Attributes
+model RadGroupCheck {
+  id        Int    @id @default(autoincrement())
+  groupname String
+  attribute String
+  op        String @default(":=")
+  value     String
+}
+
+// FreeRADIUS User-Group Mapping
+model RadUserGroup {
+  id        Int    @id @default(autoincrement())
+  username  String
+  groupname String
+  priority  Int    @default(1)
+
+  @@unique([username, groupname])
+}
+
+// Admin Panel User Authentication
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
