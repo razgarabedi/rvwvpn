@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import UserManagement from "@/components/user-management"
+import ServerConfig from "@/components/server-config"
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -39,6 +40,9 @@ export default function Home() {
             </Button>
           </div>
         </div>
+
+        {/* Server Configuration */}
+        <ServerConfig />
 
         {/* User Management */}
         <UserManagement />

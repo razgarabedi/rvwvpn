@@ -9,6 +9,8 @@
     "lint": "eslint",
     "test:seed": "node scripts/test-seed.js",
     "test:api": "node scripts/test-api.js",
+    "test:server-api": "node scripts/test-server-api.js",
+    "diagnose": "node scripts/diagnose.js",
     "db:push": "npx prisma db push",
     "db:seed": "npx prisma db seed",
     "db:studio": "npx prisma studio"
@@ -19,6 +21,7 @@
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.6",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

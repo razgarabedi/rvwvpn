@@ -1,15 +1,22 @@
 # User Management System
 
-This document explains the RADIUS user management system implemented in the Radius Admin dashboard.
+This document explains the RADIUS user management system and FreeRADIUS server configuration implemented in the Radius Admin dashboard.
 
 ## Overview
 
-The user management system provides a complete CRUD (Create, Read, Update, Delete) interface for managing FreeRADIUS users. It includes a web-based UI and RESTful API endpoints for programmatic access.
+The system provides a complete CRUD (Create, Read, Update, Delete) interface for managing:
+1. **FreeRADIUS Users** - User accounts and passwords for RADIUS authentication
+2. **FreeRADIUS Server Configuration** - IP:port and secret settings for connecting to FreeRADIUS servers
+
+It includes a web-based UI and RESTful API endpoints for programmatic access.
 
 ## API Endpoints
 
-### Base URL
+### User Management Endpoints
 All user management endpoints are prefixed with `/api/radius/users`
+
+### Server Configuration Endpoints
+All server configuration endpoints are prefixed with `/api/radius/servers`
 
 ### Authentication
 All endpoints require authentication via NextAuth.js session. Unauthenticated requests return a 401 Unauthorized status.
@@ -113,6 +120,122 @@ All endpoints require authentication via NextAuth.js session. Unauthenticated re
 - `404` - Not Found
 - `500` - Server Error
 
+#### GET /api/radius/servers
+**Description**: Fetch all FreeRADIUS server configurations
+
+**Response**:
+```json
+[
+  {
+    "id": "clx1234567890",
+    "name": "Main RADIUS Server",
+    "host": "192.168.1.100",
+    "port": 1813,
+    "secret": "testing123",
+    "isActive": true,
+    "description": "Primary FreeRADIUS server",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]
+```
+
+**Status Codes**:
+- `200` - Success
+- `401` - Unauthorized
+- `500` - Server Error
+
+#### POST /api/radius/servers
+**Description**: Create a new FreeRADIUS server configuration
+
+**Request Body**:
+```json
+{
+  "name": "Main RADIUS Server",
+  "host": "192.168.1.100",
+  "port": 1813,
+  "secret": "testing123",
+  "description": "Primary FreeRADIUS server",
+  "isActive": true
+}
+```
+
+**Response**:
+```json
+{
+  "id": "clx1234567890",
+  "name": "Main RADIUS Server",
+  "host": "192.168.1.100",
+  "port": 1813,
+  "secret": "testing123",
+  "isActive": true,
+  "description": "Primary FreeRADIUS server",
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+**Status Codes**:
+- `201` - Created
+- `400` - Bad Request (missing fields or invalid port)
+- `401` - Unauthorized
+- `409` - Conflict (server name already exists)
+- `500` - Server Error
+
+#### PUT /api/radius/servers/[id]
+**Description**: Update an existing FreeRADIUS server configuration
+
+**Request Body**:
+```json
+{
+  "name": "Updated RADIUS Server",
+  "host": "192.168.1.101",
+  "port": 1813,
+  "secret": "newsecret123",
+  "description": "Updated server configuration",
+  "isActive": false
+}
+```
+
+**Response**:
+```json
+{
+  "id": "clx1234567890",
+  "name": "Updated RADIUS Server",
+  "host": "192.168.1.101",
+  "port": 1813,
+  "secret": "newsecret123",
+  "isActive": false,
+  "description": "Updated server configuration",
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T12:00:00.000Z"
+}
+```
+
+**Status Codes**:
+- `200` - Success
+- `400` - Bad Request (missing fields or invalid port)
+- `401` - Unauthorized
+- `404` - Not Found
+- `409` - Conflict (server name already exists)
+- `500` - Server Error
+
+#### DELETE /api/radius/servers/[id]
+**Description**: Delete a FreeRADIUS server configuration
+
+**Response**:
+```json
+{
+  "message": "Server configuration deleted successfully"
+}
+```
+
+**Status Codes**:
+- `200` - Success
+- `401` - Unauthorized
+- `404` - Not Found
+- `500` - Server Error
+
 ## Database Schema
 
 ### RadCheck Table
@@ -136,6 +259,34 @@ CREATE TABLE "RadCheck" (
 - **op**: RADIUS operation (default: ":=")
 - **value**: Password or attribute value (stored as plaintext)
 
+### RadiusServerConfig Table
+The server configuration system uses the `RadiusServerConfig` table:
+
+```sql
+CREATE TABLE "RadiusServerConfig" (
+  "id" TEXT PRIMARY KEY,
+  "name" TEXT UNIQUE NOT NULL,
+  "host" TEXT NOT NULL,
+  "port" INTEGER NOT NULL,
+  "secret" TEXT NOT NULL,
+  "isActive" BOOLEAN DEFAULT true,
+  "description" TEXT,
+  "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Field Descriptions
+- **id**: CUID primary key
+- **name**: Unique server configuration name
+- **host**: IP address or hostname of the FreeRADIUS server
+- **port**: Port number (typically 1813 for accounting, 1812 for authentication)
+- **secret**: Shared secret for authenticating with the FreeRADIUS server
+- **isActive**: Whether this server configuration is currently active
+- **description**: Optional description of the server configuration
+- **createdAt**: Creation timestamp
+- **updatedAt**: Last update timestamp
+
 ## UI Components
 
 ### User Management Component
@@ -148,6 +299,18 @@ CREATE TABLE "RadCheck" (
 - Real-time updates
 - Loading states
 - Error handling
+
+### Server Configuration Component
+**File**: `src/components/server-config.tsx`
+
+**Features**:
+- Server configuration table with status indicators
+- Add/Edit server configuration dialog
+- Delete confirmation
+- Real-time updates
+- Loading states
+- Error handling
+- Active/Inactive status management
 
 ### Table Columns
 1. **Username**: User identifier
