@@ -215,3 +215,42 @@ model AdminUser {
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run test:api` - Test user management API
+- `npm run test:server-api` - Test server configuration API
+- `npm run diagnose` - Diagnose system issues
+- `npm run db:push` - Push database schema
+- `npm run db:seed` - Seed database with initial data
+- `npm run db:studio` - Open Prisma Studio
+
+## Deployment
+
+### Ubuntu Deployment
+
+For production deployment on Ubuntu with Nginx and Let's Encrypt:
+
+#### Quick Deployment (Automated)
+```bash
+# Upload application to server
+scp -r radius-admin/ username@your-server-ip:/home/username/
+
+# Connect to server and run deployment script
+ssh username@your-server-ip
+cd radius-admin
+chmod +x scripts/deploy-ubuntu.sh
+./scripts/deploy-ubuntu.sh
+```
+
+#### Manual Deployment
+Follow the detailed guide: [Ubuntu Deployment Guide](docs/deployment-ubuntu.md)
+
+#### Quick Start
+- **Simple Setup** (5 minutes, no PM2 complexity): [Simple Setup Guide](docs/simple-setup.md)
+- **Full Setup** (with PM2): [Ubuntu Quick Start](docs/ubuntu-quick-start.md)
+
+#### Fix Common Issues
+- **Nginx SSL issues** (XML display, site not loading): [Fix Nginx SSL Script](scripts/fix-nginx-ssl.sh)
+- **Next.js static files not loading**: [Fix Next.js Nginx Script](scripts/fix-nextjs-nginx.sh)
+- **General troubleshooting**: [Diagnostic Script](scripts/diagnose-nginx.sh)
+
+### Docker Deployment (Coming Soon)
+Docker deployment options will be available in future releases.

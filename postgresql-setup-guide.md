@@ -79,11 +79,7 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO radius_admin_user;
 -- Set default privileges for future tables
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO radius_admin_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO radius_admin_user;
-
--- Exit psql
-\q
-```
-   -- Connect to your database
+-- Connect to your database
    \c radius_admin_db
    
    -- Grant all necessary permissions to your user
@@ -105,6 +101,10 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO radius_admin
    
    -- Exit psql
    \q
+-- Exit psql
+\q
+```
+
 ### Step 4: Test the New User Connection
 Test that your new user can connect to the database:
 
