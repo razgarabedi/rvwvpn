@@ -49,11 +49,11 @@ export async function PUT(
     }
 
     // Check if username is being changed and if new username already exists
-    if (existingUser.UserName !== username) {
+    if (existingUser.username !== username) {
       const usernameExists = await prisma.radCheck.findFirst({
         where: {
-          UserName: username,
-          Attribute: "Cleartext-Password",
+          username: username,
+          attribute: "Cleartext-Password",
           id: { not: userId }
         }
       })
@@ -70,8 +70,8 @@ export async function PUT(
     const updatedUser = await prisma.radCheck.update({
       where: { id: userId },
       data: {
-        UserName: username,
-        Value: password // Store as plaintext as per FreeRADIUS requirements
+        username: username,
+        value: password // Store as plaintext as per FreeRADIUS requirements
       }
     })
 

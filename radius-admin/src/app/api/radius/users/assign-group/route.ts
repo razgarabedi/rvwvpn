@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
     // Check if user exists
     const userExists = await prisma.radCheck.findFirst({
       where: {
-        UserName: username,
-        Attribute: "Cleartext-Password"
+        username: username,
+        attribute: "Cleartext-Password"
       }
     })
 
@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
     // Check if assignment already exists
     const existingAssignment = await prisma.radUserGroup.findFirst({
       where: {
-        UserName: username,
-        GroupName: groupName
+        username: username,
+        groupname: groupName
       }
     })
 
@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
     // Create user-group assignment
     const assignment = await prisma.radUserGroup.create({
       data: {
-        UserName: username,
-        GroupName: groupName,
+        username: username,
+        groupname: groupName,
         priority: priority
       }
     })

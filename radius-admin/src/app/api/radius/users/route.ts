@@ -15,7 +15,7 @@ export async function GET() {
 
     const users = await prisma.radCheck.findMany({
       orderBy: {
-        UserName: 'asc'
+        username: 'asc'
       }
     })
 
@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
     // Check if user already exists
     const existingUser = await prisma.radCheck.findFirst({
       where: {
-        UserName: username,
-        Attribute: "Cleartext-Password"
+        username: username,
+        attribute: "Cleartext-Password"
       }
     })
 
@@ -67,10 +67,10 @@ export async function POST(request: NextRequest) {
     // Create new user
     const newUser = await prisma.radCheck.create({
       data: {
-        UserName: username,
-        Attribute: "Cleartext-Password",
+        username: username,
+        attribute: "Cleartext-Password",
         op: ":=",
-        Value: password // Store as plaintext as per FreeRADIUS requirements
+        value: password // Store as plaintext as per FreeRADIUS requirements
       }
     })
 

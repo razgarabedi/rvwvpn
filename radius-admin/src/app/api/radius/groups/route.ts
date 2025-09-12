@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     // Check if group already exists
     const existingGroup = await prisma.radGroupCheck.findFirst({
       where: {
-        GroupName: groupName
+        groupname: groupName
       }
     })
 
@@ -93,10 +93,10 @@ export async function POST(request: NextRequest) {
     for (const check of checks) {
       await prisma.radGroupCheck.create({
         data: {
-          GroupName: groupName,
-          Attribute: check.attribute,
+          groupname: groupName,
+          attribute: check.attribute,
           op: check.op || "==",
-          Value: check.value
+          value: check.value
         }
       })
     }
@@ -105,10 +105,10 @@ export async function POST(request: NextRequest) {
     for (const reply of replies) {
       await prisma.radGroupReply.create({
         data: {
-          GroupName: groupName,
-          Attribute: reply.attribute,
+          groupname: groupName,
+          attribute: reply.attribute,
           op: reply.op || "=",
-          Value: reply.value
+          value: reply.value
         }
       })
     }

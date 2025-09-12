@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
     // Check if user exists
     const userExists = await prisma.radCheck.findFirst({
       where: {
-        UserName: username,
-        Attribute: "Cleartext-Password"
+        username: username,
+        attribute: "Cleartext-Password"
       }
     })
 
@@ -46,18 +46,12 @@ export async function POST(request: NextRequest) {
         continue // Skip invalid attributes
       }
 
-      const replyAttribute = await prisma.radReply.upsert({
-        where: {
-          id: 0 // This will always create new since we're not using a unique constraint
-        },
-        update: {
-          Value: attr.value
-        },
-        create: {
-          UserName: username,
-          Attribute: attr.attribute,
+      const replyAttribute = await prisma.radReply.create({
+        data: {
+          username: username,
+          attribute: attr.attribute,
           op: attr.op || "=",
-          Value: attr.value
+          value: attr.value
         }
       })
 
