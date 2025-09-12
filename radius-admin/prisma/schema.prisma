@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,37 +7,137 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// FreeRADIUS User Credentials and Attributes
+model RadAcct {
+  RadAcctId           BigInt    @id @default(autoincrement())
+  AcctSessionId       String?
+  AcctUniqueId        String    @unique
+  UserName            String?
+  Realm               String?
+  NASIPAddress        String
+  NASPortId           String?
+  NASPortType         String?
+  AcctStartTime       DateTime?
+  AcctUpdateTime      DateTime?
+  AcctStopTime        DateTime?
+  AcctInterval        BigInt?
+  AcctSessionTime     BigInt?
+  AcctAuthentic       String?
+  ConnectInfo_start   String?
+  ConnectInfo_stop    String?
+  AcctInputOctets     BigInt?
+  AcctOutputOctets    BigInt?
+  CalledStationId     String?
+  CallingStationId    String?
+  AcctTerminateCause  String?
+  ServiceType         String?
+  FramedProtocol      String?
+  FramedIPAddress     String?
+  FramedIPv6Address   String?
+  FramedIPv6Prefix    String?
+  FramedInterfaceId   String?
+  DelegatedIPv6Prefix String?
+  Class               String?
+
+  @@index([AcctUniqueId], map: "radacct_active_session_idx")
+  @@index([NASIPAddress, AcctStartTime], map: "radacct_bulk_close")
+  @@index([AcctStartTime, UserName], map: "radacct_start_user_idx")
+  @@index([Class], map: "radacct_calss_idx")
+  @@map("radacct")
+}
+
 model RadCheck {
   id        Int    @id @default(autoincrement())
-  username  String
-  attribute String @default("Cleartext-Password")
-  op        String @default(":=")
-  value     String
+  UserName  String
+  Attribute String
+  op        String @default("==")
+  Value     String
 
-  @@unique([username, attribute])
+  @@index([UserName, Attribute], map: "radcheck_UserName")
+  @@map("radcheck")
 }
 
-// FreeRADIUS Group Attributes
+model RadReply {
+  id        Int    @id @default(autoincrement())
+  UserName  String
+  Attribute String
+  op        String @default("=")
+  Value     String
+
+  @@index([UserName, Attribute], map: "radreply_UserName")
+  @@map("radreply")
+}
+
 model RadGroupCheck {
   id        Int    @id @default(autoincrement())
-  groupname String
-  attribute String
-  op        String @default(":=")
-  value     String
+  GroupName String
+  Attribute String
+  op        String @default("==")
+  Value     String
+
+  @@unique([GroupName, Attribute, op, Value], map: "radgroupcheck_GroupName_Attribute_op_Value")
+  @@index([GroupName, Attribute], map: "radgroupcheck_GroupName")
+  @@map("radgroupcheck")
 }
 
-// FreeRADIUS User-Group Mapping
+model RadGroupReply {
+  id        Int    @id @default(autoincrement())
+  GroupName String
+  Attribute String
+  op        String @default("=")
+  Value     String
+
+  @@unique([GroupName, Attribute, op, Value], map: "radgroupreply_GroupName_Attribute_op_Value")
+  @@index([GroupName, Attribute], map: "radgroupreply_GroupName")
+  @@map("radgroupreply")
+}
+
 model RadUserGroup {
   id        Int    @id @default(autoincrement())
-  username  String
-  groupname String
-  priority  Int    @default(1)
+  UserName  String
+  GroupName String
+  priority  Int    @default(0)
 
-  @@unique([username, groupname])
+  @@index([UserName], map: "radusergroup_UserName")
+  @@map("radusergroup")
 }
 
-// Admin Panel User Authentication
+model RadPostAuth {
+  id               BigInt   @id @default(autoincrement())
+  username         String
+  pass             String?
+  reply            String?
+  CalledStationId  String?
+  CallingStationId String?
+  authdate         DateTime @default(now())
+  Class            String?
+
+  @@index([username])
+  @@index([Class], map: "radpostauth_class_idx")
+  @@map("radpostauth")
+}
+
+model Nas {
+  id          Int     @id @default(autoincrement())
+  nasname     String  @unique
+  shortname   String
+  type        String  @default("other")
+  ports       Int?
+  secret      String
+  server      String?
+  community   String?
+  description String?
+
+  @@index([nasname], map: "nas_nasname")
+  @@map("nas")
+}
+
+model NasReload {
+  NASIPAddress String   @id
+  ReloadTime   DateTime
+
+  @@map("nasreload")
+}
+
 model AdminUser {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -49,13 +146,12 @@ model AdminUser {
   updatedAt DateTime @updatedAt
 }
 
-// FreeRADIUS Server Configuration
 model RadiusServerConfig {
   id          String   @id @default(cuid())
   name        String   @unique
-  host        String   // IP address or hostname
-  port        Int      // Port number (default 1813 for accounting)
-  secret      String   // Shared secret for authentication
+  host        String
+  port        Int
+  secret      String
   isActive    Boolean  @default(true)
   description String?
   createdAt   DateTime @default(now())

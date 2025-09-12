@@ -11,10 +11,10 @@ import { Plus, Edit, Trash2 } from "lucide-react"
 
 interface RadUser {
   id: number
-  username: string
-  attribute: string
+  UserName: string
+  Attribute: string
   op: string
-  value: string
+  Value: string
 }
 
 export default function UserManagement() {
@@ -87,8 +87,8 @@ export default function UserManagement() {
   const handleEdit = (user: RadUser) => {
     setEditingUser(user)
     setFormData({
-      username: user.username,
-      password: user.value
+      username: user.UserName,
+      password: user.Value
     })
     setIsDialogOpen(true)
   }
@@ -169,10 +169,10 @@ export default function UserManagement() {
               <TableBody>
                 {users.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.username}</TableCell>
-                    <TableCell>{user.attribute}</TableCell>
+                    <TableCell className="font-medium">{user.UserName}</TableCell>
+                    <TableCell>{user.Attribute}</TableCell>
                     <TableCell className="font-mono text-sm">
-                      {user.value.length > 10 ? `${user.value.substring(0, 10)}...` : user.value}
+                      {user.Value.length > 10 ? `${user.Value.substring(0, 10)}...` : user.Value}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
