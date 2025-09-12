@@ -12,26 +12,26 @@ import { Plus, Edit, Trash2, Users, Server } from "lucide-react"
 
 interface RadUser {
   id: number
-  UserName: string
-  Attribute: string
+  username: string
+  attribute: string
   op: string
-  Value: string
+  value: string
 }
 
 interface RadGroupCheck {
   id: number
-  GroupName: string
-  Attribute: string
+  groupname: string
+  attribute: string
   op: string
-  Value: string
+  value: string
 }
 
 interface RadGroupReply {
   id: number
-  GroupName: string
-  Attribute: string
+  groupname: string
+  attribute: string
   op: string
-  Value: string
+  value: string
 }
 
 interface RadGroup {
@@ -230,8 +230,8 @@ export default function EnhancedUserManagement() {
   const handleEdit = (user: RadUser) => {
     setEditingUser(user)
     setFormData({
-      username: user.UserName,
-      password: user.Value,
+      username: user.username,
+      password: user.value,
       group: "",
       sessionTimeout: "3600",
       idleTimeout: "1800"
@@ -342,10 +342,10 @@ export default function EnhancedUserManagement() {
                 <TableBody>
                   {users.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.UserName}</TableCell>
-                      <TableCell>{user.Attribute}</TableCell>
+                      <TableCell className="font-medium">{user.username}</TableCell>
+                      <TableCell>{user.attribute}</TableCell>
                       <TableCell className="font-mono text-sm">
-                        {user.Value.length > 10 ? `${user.Value.substring(0, 10)}...` : user.Value}
+                        {user.value.length > 10 ? `${user.value.substring(0, 10)}...` : user.value}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -397,7 +397,7 @@ export default function EnhancedUserManagement() {
                       <h4 className="font-medium text-sm text-gray-600">Check Attributes:</h4>
                       <ul className="text-sm text-gray-500">
                         {group.checks.map((check: RadGroupCheck, i: number) => (
-                          <li key={i}>{check.Attribute} {check.op} {check.Value}</li>
+                          <li key={i}>{check.attribute} {check.op} {check.value}</li>
                         ))}
                       </ul>
                     </div>
@@ -405,7 +405,7 @@ export default function EnhancedUserManagement() {
                       <h4 className="font-medium text-sm text-gray-600">Reply Attributes:</h4>
                       <ul className="text-sm text-gray-500">
                         {group.replies.map((reply: RadGroupReply, i: number) => (
-                          <li key={i}>{reply.Attribute} {reply.op} {reply.Value}</li>
+                          <li key={i}>{reply.attribute} {reply.op} {reply.value}</li>
                         ))}
                       </ul>
                     </div>
