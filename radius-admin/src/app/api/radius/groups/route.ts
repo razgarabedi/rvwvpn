@@ -16,33 +16,33 @@ export async function GET() {
     // Get unique group names from radgroupcheck table
     const groups = await prisma.radGroupCheck.findMany({
       select: {
-        GroupName: true
+        groupname: true
       },
-      distinct: ['GroupName'],
+      distinct: ['groupname'],
       orderBy: {
-        GroupName: 'asc'
+        groupname: 'asc'
       }
     })
 
     // Get group check attributes
     const groupChecks = await prisma.radGroupCheck.findMany({
       orderBy: {
-        GroupName: 'asc'
+        groupname: 'asc'
       }
     })
 
     // Get group reply attributes
     const groupReplies = await prisma.radGroupReply.findMany({
       orderBy: {
-        GroupName: 'asc'
+        groupname: 'asc'
       }
     })
 
     // Combine data
     const groupData = groups.map(group => ({
-      name: group.GroupName,
-      checks: groupChecks.filter(check => check.GroupName === group.GroupName),
-      replies: groupReplies.filter(reply => reply.GroupName === group.GroupName)
+      name: group.groupname,
+      checks: groupChecks.filter(check => check.groupname === group.groupname),
+      replies: groupReplies.filter(reply => reply.groupname === group.groupname)
     }))
 
     return NextResponse.json(groupData)

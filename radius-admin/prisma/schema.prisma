@@ -47,57 +47,57 @@ model RadAcct {
 
 model RadCheck {
   id        Int    @id @default(autoincrement())
-  UserName  String
-  Attribute String
+  username  String @map("UserName")
+  attribute String @map("Attribute")
   op        String @default("==")
-  Value     String
+  value     String @map("Value")
 
-  @@index([UserName, Attribute], map: "radcheck_UserName")
+  @@index([username, attribute], map: "radcheck_UserName")
   @@map("radcheck")
 }
 
 model RadReply {
   id        Int    @id @default(autoincrement())
-  UserName  String
-  Attribute String
+  username  String @map("UserName")
+  attribute String @map("Attribute")
   op        String @default("=")
-  Value     String
+  value     String @map("Value")
 
-  @@index([UserName, Attribute], map: "radreply_UserName")
+  @@index([username, attribute], map: "radreply_UserName")
   @@map("radreply")
 }
 
 model RadGroupCheck {
   id        Int    @id @default(autoincrement())
-  GroupName String
-  Attribute String
+  groupname String @map("GroupName")
+  attribute String @map("Attribute")
   op        String @default("==")
-  Value     String
+  value     String @map("Value")
 
-  @@unique([GroupName, Attribute, op, Value], map: "radgroupcheck_GroupName_Attribute_op_Value")
-  @@index([GroupName, Attribute], map: "radgroupcheck_GroupName")
+  @@unique([groupname, attribute, op, value], map: "radgroupcheck_GroupName_Attribute_op_Value")
+  @@index([groupname, attribute], map: "radgroupcheck_GroupName")
   @@map("radgroupcheck")
 }
 
 model RadGroupReply {
   id        Int    @id @default(autoincrement())
-  GroupName String
-  Attribute String
+  groupname String @map("GroupName")
+  attribute String @map("Attribute")
   op        String @default("=")
-  Value     String
+  value     String @map("Value")
 
-  @@unique([GroupName, Attribute, op, Value], map: "radgroupreply_GroupName_Attribute_op_Value")
-  @@index([GroupName, Attribute], map: "radgroupreply_GroupName")
+  @@unique([groupname, attribute, op, value], map: "radgroupreply_GroupName_Attribute_op_Value")
+  @@index([groupname, attribute], map: "radgroupreply_GroupName")
   @@map("radgroupreply")
 }
 
 model RadUserGroup {
   id        Int    @id @default(autoincrement())
-  UserName  String
-  GroupName String
+  username  String @map("UserName")
+  groupname String @map("GroupName")
   priority  Int    @default(0)
 
-  @@index([UserName], map: "radusergroup_UserName")
+  @@index([username], map: "radusergroup_UserName")
   @@map("radusergroup")
 }
 

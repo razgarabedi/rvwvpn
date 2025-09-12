@@ -18,26 +18,20 @@ async function createGroupWithAttributes(
       // Check if this attribute already exists
       const existingCheck = await prisma.radGroupCheck.findFirst({
         where: {
-          // @ts-ignore - Prisma client expects PascalCase at runtime
-          GroupName: groupName,
-          // @ts-ignore - Prisma client expects PascalCase at runtime
-          Attribute: check.Attribute,
+          groupname: groupName,
+          attribute: check.Attribute,
           op: check.op,
-          // @ts-ignore - Prisma client expects PascalCase at runtime
-          Value: check.Value
+          value: check.Value
         }
       })
 
       if (!existingCheck) {
         await prisma.radGroupCheck.create({
           data: {
-            // @ts-ignore - Prisma client expects PascalCase at runtime
-            GroupName: groupName,
-            // @ts-ignore - Prisma client expects PascalCase at runtime
-            Attribute: check.Attribute,
+            groupname: groupName,
+            attribute: check.Attribute,
             op: check.op,
-            // @ts-ignore - Prisma client expects PascalCase at runtime
-            Value: check.Value
+            value: check.Value
           }
         })
       }
@@ -48,26 +42,20 @@ async function createGroupWithAttributes(
       // Check if this attribute already exists
       const existingReply = await prisma.radGroupReply.findFirst({
         where: {
-          // @ts-ignore - Prisma client expects PascalCase at runtime
-          GroupName: groupName,
-          // @ts-ignore - Prisma client expects PascalCase at runtime
-          Attribute: reply.Attribute,
+          groupname: groupName,
+          attribute: reply.Attribute,
           op: reply.op,
-          // @ts-ignore - Prisma client expects PascalCase at runtime
-          Value: reply.Value
+          value: reply.Value
         }
       })
 
       if (!existingReply) {
         await prisma.radGroupReply.create({
           data: {
-            // @ts-ignore - Prisma client expects PascalCase at runtime
-            GroupName: groupName,
-            // @ts-ignore - Prisma client expects PascalCase at runtime
-            Attribute: reply.Attribute,
+            groupname: groupName,
+            attribute: reply.Attribute,
             op: reply.op,
-            // @ts-ignore - Prisma client expects PascalCase at runtime
-            Value: reply.Value
+            value: reply.Value
           }
         })
       }
