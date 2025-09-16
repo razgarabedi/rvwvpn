@@ -9,95 +9,95 @@ datasource db {
 
 model RadAcct {
   RadAcctId           BigInt    @id @default(autoincrement())
-  AcctSessionId       String?
-  AcctUniqueId        String    @unique
-  UserName            String?
-  Realm               String?
-  NASIPAddress        String
-  NASPortId           String?
-  NASPortType         String?
-  AcctStartTime       DateTime?
-  AcctUpdateTime      DateTime?
-  AcctStopTime        DateTime?
-  AcctInterval        BigInt?
-  AcctSessionTime     BigInt?
-  AcctAuthentic       String?
-  ConnectInfo_start   String?
-  ConnectInfo_stop    String?
-  AcctInputOctets     BigInt?
-  AcctOutputOctets    BigInt?
-  CalledStationId     String?
-  CallingStationId    String?
-  AcctTerminateCause  String?
-  ServiceType         String?
-  FramedProtocol      String?
-  FramedIPAddress     String?
-  FramedIPv6Address   String?
-  FramedIPv6Prefix    String?
-  FramedInterfaceId   String?
-  DelegatedIPv6Prefix String?
-  Class               String?
+  acctsessionid       String?
+  acctuniqueid        String    @unique
+  username            String?
+  realm               String?
+  nasipaddress        String
+  nasportid           String?
+  nasporttype         String?
+  acctstarttime       DateTime?
+  acctupdatetime      DateTime?
+  acctstoptime        DateTime?
+  acctinterval        BigInt?
+  acctsessiontime     BigInt?
+  acctauthentic       String?
+  connectinfo_start   String?
+  connectinfo_stop    String?
+  acctinputoctets     BigInt?
+  acctoutputoctets    BigInt?
+  calledstationid     String?
+  callingstationid    String?
+  acctterminatecause  String?
+  servicetype         String?
+  framedprotocol      String?
+  framedipaddress     String?
+  framedipv6address   String?
+  framedipv6prefix    String?
+  framedinterfaceid   String?
+  delegatedipv6prefix String?
+  class               String?
 
-  @@index([AcctUniqueId], map: "radacct_active_session_idx")
-  @@index([NASIPAddress, AcctStartTime], map: "radacct_bulk_close")
-  @@index([AcctStartTime, UserName], map: "radacct_start_user_idx")
-  @@index([Class], map: "radacct_calss_idx")
+  @@index([acctuniqueid], map: "radacct_active_session_idx")
+  @@index([nasipaddress, acctstarttime], map: "radacct_bulk_close")
+  @@index([acctstarttime, username], map: "radacct_start_user_idx")
+  @@index([class], map: "radacct_class_idx")
   @@map("radacct")
 }
 
 model RadCheck {
   id        Int    @id @default(autoincrement())
-  username  String @map("UserName")
-  attribute String @map("Attribute")
+  username  String
+  attribute String
   op        String @default("==")
-  value     String @map("Value")
+  value     String
 
-  @@index([username, attribute], map: "radcheck_UserName")
+  @@index([username, attribute], map: "radcheck_username")
   @@map("radcheck")
 }
 
 model RadReply {
   id        Int    @id @default(autoincrement())
-  username  String @map("UserName")
-  attribute String @map("Attribute")
+  username  String
+  attribute String
   op        String @default("=")
-  value     String @map("Value")
+  value     String
 
-  @@index([username, attribute], map: "radreply_UserName")
+  @@index([username, attribute], map: "radreply_username")
   @@map("radreply")
 }
 
 model RadGroupCheck {
   id        Int    @id @default(autoincrement())
-  groupname String @map("GroupName")
-  attribute String @map("Attribute")
+  groupname String
+  attribute String
   op        String @default("==")
-  value     String @map("Value")
+  value     String
 
-  @@unique([groupname, attribute, op, value], map: "radgroupcheck_GroupName_Attribute_op_Value")
-  @@index([groupname, attribute], map: "radgroupcheck_GroupName")
+  @@unique([groupname, attribute, op, value], map: "radgroupcheck_groupname_attribute_op_value")
+  @@index([groupname, attribute], map: "radgroupcheck_groupname")
   @@map("radgroupcheck")
 }
 
 model RadGroupReply {
   id        Int    @id @default(autoincrement())
-  groupname String @map("GroupName")
-  attribute String @map("Attribute")
+  groupname String
+  attribute String
   op        String @default("=")
-  value     String @map("Value")
+  value     String
 
-  @@unique([groupname, attribute, op, value], map: "radgroupreply_GroupName_Attribute_op_Value")
-  @@index([groupname, attribute], map: "radgroupreply_GroupName")
+  @@unique([groupname, attribute, op, value], map: "radgroupreply_groupname_attribute_op_value")
+  @@index([groupname, attribute], map: "radgroupreply_groupname")
   @@map("radgroupreply")
 }
 
 model RadUserGroup {
   id        Int    @id @default(autoincrement())
-  username  String @map("UserName")
-  groupname String @map("GroupName")
+  username  String
+  groupname String
   priority  Int    @default(0)
 
-  @@index([username], map: "radusergroup_UserName")
+  @@index([username], map: "radusergroup_username")
   @@map("radusergroup")
 }
 
@@ -106,13 +106,13 @@ model RadPostAuth {
   username         String
   pass             String?
   reply            String?
-  CalledStationId  String?
-  CallingStationId String?
+  calledstationid  String?
+  callingstationid String?
   authdate         DateTime @default(now())
-  Class            String?
+  class            String?
 
   @@index([username])
-  @@index([Class], map: "radpostauth_class_idx")
+  @@index([class], map: "radpostauth_class_idx")
   @@map("radpostauth")
 }
 
@@ -132,8 +132,8 @@ model Nas {
 }
 
 model NasReload {
-  NASIPAddress String   @id
-  ReloadTime   DateTime
+  nasipaddress String   @id
+  reloadtime   DateTime
 
   @@map("nasreload")
 }
