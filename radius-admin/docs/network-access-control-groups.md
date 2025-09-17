@@ -372,6 +372,90 @@ When you try to access the `Private` share, you will be prompted for the usernam
 
 You are now ready to test the end-to-end configuration.
 
+Yes, it's absolutely possible to have Samba use more than one network interface and then restrict a specific shared folder to be available only on one of those interfaces.
+
+You achieve this by combining a **global setting** to listen on all desired interfaces with a **per-share setting** to filter access based on the client's IP address.
+
+-----
+
+### \#\# 1. Configure Samba to Use Multiple Interfaces 🌐
+
+First, you need to tell Samba to listen for connections on all the network interfaces you want it to use. This is done in the `[global]` section of your `/etc/samba/smb.conf` file.
+
+Let's say your server has two interfaces:
+
+  * `eth0` with an IP on the `192.168.1.0/24` network.
+  * `eth1` with an IP on the `10.0.0.0/24` network.
+
+You would edit your `smb.conf` like this:
+
+```bash
+sudo nano /etc/samba/smb.conf
+```
+
+In the `[global]` section, add or modify the `interfaces` line to include the names of your interfaces or their subnets. The `bind interfaces only = yes` directive is a crucial security measure to ensure Samba only listens on these specific interfaces.
+
+```ini
+[global]
+   ## Add these lines under your existing global settings
+   interfaces = lo eth0 eth1
+   bind interfaces only = yes
+```
+
+This configuration makes the Samba server accessible from both the `192.168.1.0/24` and `10.0.0.0/24` networks.
+
+-----
+
+### \#\# 2. Restrict a Share to a Specific Interface 🔒
+
+While there isn't a direct `interface = eth1` setting for a share, you can achieve the same result by using the **`hosts allow`** parameter. This parameter filters access based on the source IP address of the client, effectively tying the share to the network connected to a specific interface.
+
+Continuing the example, let's create two shares:
+
+  * `[Public]` will be available to everyone on both networks.
+  * `[Admin]` will be available **only** to clients on the `10.0.0.0/24` network (connected via `eth1`).
+
+Append this to the end of your `smb.conf` file:
+
+```ini
+[Public]
+  path = /srv/samba/public
+  writable = yes
+  guest ok = yes
+  comment = Available on all networks
+
+[Admin]
+  path = /srv/samba/admin
+  writable = yes
+  valid users = @your_admin_group
+  comment = Available only on the 10.0.0.0 network
+  # This is the key line for restricting access:
+  hosts allow = 10.0.0.0/24 127.0.0.1
+```
+
+**How it works:**
+
+  * The `[Public]` share has no `hosts allow` line, so it follows the global rule and is accessible from any interface Samba is listening on.
+  * The `[Admin]` share's **`hosts allow = 10.0.0.0/24 127.0.0.1`** line acts as a filter. Samba will only grant access to this share if the connection request comes from an IP address within the `10.0.0.0/24` subnet or from the server itself (`127.0.0.1`).
+
+-----
+
+### \#\# 3. Apply the Changes
+
+After saving your `smb.conf` file, always check it for syntax errors with `testparm`.
+
+```bash
+testparm
+```
+
+If it shows no errors, restart the Samba services to apply your new configuration.
+
+```bash
+sudo systemctl restart smbd nmbd
+```
+
+Now, clients from the `192.168.1.0/24` network will be able to see and access the `[Public]` share but will be denied access to the `[Admin]` share, while clients on the `10.0.0.0/24` network can access both.
+
 1.  **Configure RADIUS:** In the Radius Admin dashboard, create a test group that has a `Framed-Route` reply attribute for `192.168.20.130/32`. Assign your test user to this group.
 2.  **Connect to VPN:** On your Windows machine, connect to the VPN with your test user.
 3.  **Test Access:** Open File Explorer and navigate to `\\192.168.20.130\testshare`. The connection should succeed, and you should see the shared folder.
