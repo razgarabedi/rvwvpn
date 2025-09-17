@@ -159,26 +159,6 @@ To ensure the dummy interface is recreated automatically after a reboot, you can
 
 ### 3. Set Up a Samba File Share for Testing
 
-Of course. Here is a complete guide on how to install and configure Samba on an Ubuntu 22.04 server using SSH.
-
-This guide will walk you through setting up two common types of shares: a **public, guest-accessible share** and a **private, user-specific share**.
-
------
-
-### \#\# 1. Connect to Your Server & Update 🚀
-
-First, connect to your Ubuntu server using SSH. Replace `username` with your actual username and `server_ip_address` with your server's IP.
-
-```bash
-ssh username@server_ip_address
-```
-
-Once connected, it's always best practice to update your package lists and upgrade existing packages to their latest versions.
-
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-
 -----
 
 ### \#\# 2. Install Samba 📦
@@ -249,19 +229,10 @@ This share will only be accessible to a specific, authenticated user. The `%u` v
 
 After adding these blocks, save the file and exit `nano` by pressing `Ctrl + X`, followed by `Y`, and then `Enter`.
 
-Based on the logs, your `nmbd` service is failing to start.
-
-The key error is: **`Status: "nmbd: No local IPv4 non-loopback interfaces available, waiting for interface ..."`**.
-
-This means the NetBIOS Name Service Daemon (`nmbd`), which handles computer name discovery on the network, can't find a network interface (like `eth0`) to attach itself to. It timed out waiting for one to appear and was shut down by the system.
-
-Here are the most common solutions to fix this.
-
 -----
 
 ### \#\# 1. Specify Network Interfaces in `smb.conf`
 
-This is the most common and reliable fix. You explicitly tell Samba which network interfaces to use.
 
 1.  **Find your network interface name.** Run the following command:
 
@@ -269,7 +240,7 @@ This is the most common and reliable fix. You explicitly tell Samba which networ
     ip a
     ```
 
-    Look for your main network interface. It will likely be named something like **`eth0`**, **`ens18`**, or **`enp0s3`** and will have your server's IP address.
+    Look for your main network interface. It will likely be named something like **`eth0`**, **`Dummy0`**, or **`enp0s3`** and will have your server's IP address.
 
 2.  **Edit the Samba configuration file.**
 
@@ -294,43 +265,9 @@ After making the configuration change, restart `nmbd` and check its status.
 
 ```bash
 sudo systemctl restart nmbd.service
-sudo systemctl status nmbd.service
-```
-
-The service should now show `active (running)`. If it's fixed, you should also restart the main Samba daemon to ensure everything is in sync:
-
-```bash
 sudo systemctl restart smbd.service
 ```
 
------
-
-### \#\# 3. (If Still Failing) Ensure Network is Ready at Boot
-
-Sometimes, especially on virtual machines, Samba can try to start before the network is fully initialized. You can tell the `nmbd` service to wait until the network is online.
-
-1.  **Create an override for the service unit:**
-
-    ```bash
-    sudo systemctl edit nmbd.service
-    ```
-
-2.  **Add the following content** to the new file that opens. This tells `systemd` to wait for the network to be fully online before starting `nmbd`.
-
-    ```ini
-    [Unit]
-    After=network-online.target
-    Wants=network-online.target
-    ```
-
-3.  Save and close the editor. Then, reload the `systemd` daemon and restart the service.
-
-    ```bash
-    sudo systemctl daemon-reload
-    sudo systemctl restart nmbd.service
-    ```
-
-Solution \#1 resolves this issue for the vast majority of cases.
 -----
 
 ### \#\# 4. Create Directories and Set Permissions 📁
@@ -411,6 +348,7 @@ Finally, you need to allow Samba traffic through Ubuntu's Uncomplicated Firewall
 
 ```bash
 sudo ufw allow 'Samba'
+sudo ufw delete allow from 192.168.20.130 to any port 445 proto tcp
 sudo ufw reload
 ```
 
