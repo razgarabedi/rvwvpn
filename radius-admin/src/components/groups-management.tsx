@@ -10,18 +10,18 @@ import { Plus, Edit, Trash2, Users } from "lucide-react"
 
 interface RadGroupCheck {
   id: number
-  GroupName: string
-  Attribute: string
+  groupname: string
+  attribute: string
   op: string
-  Value: string
+  value: string
 }
 
 interface RadGroupReply {
   id: number
-  GroupName: string
-  Attribute: string
+  groupname: string
+  attribute: string
   op: string
-  Value: string
+  value: string
 }
 
 interface RadGroup {
@@ -37,8 +37,8 @@ export default function GroupsManagement() {
   const [editingGroup, setEditingGroup] = useState<RadGroup | null>(null)
   const [formData, setFormData] = useState({
     name: "",
-    checks: [{ Attribute: "", op: ":=", Value: "" }],
-    replies: [{ Attribute: "", op: ":=", Value: "" }]
+    checks: [{ attribute: "", op: ":=", value: "" }],
+    replies: [{ attribute: "", op: ":=", value: "" }]
   })
 
   // Load groups
@@ -77,8 +77,19 @@ export default function GroupsManagement() {
         resetForm()
         setIsDialogOpen(false)
       } else {
-        const error = await response.json()
-        alert(`Error: ${error.error}`)
+        let errorMessage = 'Unknown error occurred';
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const error = await response.json();
+            errorMessage = error.error || errorMessage;
+          } catch (e) {
+            console.error('Failed to parse error response:', e);
+          }
+        } else {
+          console.error('Response is not JSON:', response);
+        }
+        alert(`Error: ${errorMessage}`);
       }
     } catch (error) {
       console.error("Error saving group:", error)
@@ -102,8 +113,19 @@ export default function GroupsManagement() {
       if (response.ok) {
         await loadGroups()
       } else {
-        const error = await response.json()
-        alert(`Error: ${error.error}`)
+        let errorMessage = 'Unknown error occurred';
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const error = await response.json();
+            errorMessage = error.error || errorMessage;
+          } catch (e) {
+            console.error('Failed to parse error response:', e);
+          }
+        } else {
+          console.error('Response is not JSON:', response);
+        }
+        alert(`Error: ${errorMessage}`);
       }
     } catch (error) {
       console.error("Error deleting group:", error)
@@ -114,10 +136,23 @@ export default function GroupsManagement() {
   // Edit group
   const handleEdit = (group: RadGroup) => {
     setEditingGroup(group)
+
+    const mappedChecks = (group.checks || []).map(c => ({
+      ...c,
+      attribute: c.attribute ?? "",
+      value: c.value ?? ""
+    }))
+
+    const mappedReplies = (group.replies || []).map(r => ({
+      ...r,
+      attribute: r.attribute ?? "",
+      value: r.value ?? ""
+    }))
+
     setFormData({
       name: group.name,
-      checks: group.checks.length > 0 ? group.checks : [{ Attribute: "", op: ":=", Value: "" }],
-      replies: group.replies.length > 0 ? group.replies : [{ Attribute: "", op: ":=", Value: "" }]
+      checks: mappedChecks.length > 0 ? mappedChecks : [{ attribute: "", op: ":=", value: "" }],
+      replies: mappedReplies.length > 0 ? mappedReplies : [{ attribute: "", op: ":=", value: "" }]
     })
     setIsDialogOpen(true)
   }
@@ -126,8 +161,8 @@ export default function GroupsManagement() {
   const resetForm = () => {
     setFormData({
       name: "",
-      checks: [{ Attribute: "", op: ":=", Value: "" }],
-      replies: [{ Attribute: "", op: ":=", Value: "" }]
+      checks: [{ attribute: "", op: ":=", value: "" }],
+      replies: [{ attribute: "", op: ":=", value: "" }]
     })
     setEditingGroup(null)
   }
@@ -136,7 +171,7 @@ export default function GroupsManagement() {
   const addCheckAttribute = () => {
     setFormData({
       ...formData,
-      checks: [...formData.checks, { Attribute: "", op: ":=", Value: "" }]
+      checks: [...formData.checks, { attribute: "", op: ":=", value: "" }]
     })
   }
 
@@ -152,7 +187,7 @@ export default function GroupsManagement() {
   const addReplyAttribute = () => {
     setFormData({
       ...formData,
-      replies: [...formData.replies, { Attribute: "", op: ":=", Value: "" }]
+      replies: [...formData.replies, { attribute: "", op: ":=", value: "" }]
     })
   }
 
@@ -229,10 +264,10 @@ export default function GroupsManagement() {
                     <div key={index} className="grid grid-cols-12 gap-2 items-center">
                       <Input
                         placeholder="Attribute"
-                        value={check.Attribute}
+                        value={check.attribute}
                         onChange={(e) => {
                           const newChecks = [...formData.checks]
-                          newChecks[index].Attribute = e.target.value
+                          newChecks[index].attribute = e.target.value
                           setFormData({ ...formData, checks: newChecks })
                         }}
                         className="col-span-4"
@@ -258,10 +293,10 @@ export default function GroupsManagement() {
                       </select>
                       <Input
                         placeholder="Value"
-                        value={check.Value}
+                        value={check.value}
                         onChange={(e) => {
                           const newChecks = [...formData.checks]
-                          newChecks[index].Value = e.target.value
+                          newChecks[index].value = e.target.value
                           setFormData({ ...formData, checks: newChecks })
                         }}
                         className="col-span-5"
@@ -294,10 +329,10 @@ export default function GroupsManagement() {
                     <div key={index} className="grid grid-cols-12 gap-2 items-center">
                       <Input
                         placeholder="Attribute"
-                        value={reply.Attribute}
+                        value={reply.attribute}
                         onChange={(e) => {
                           const newReplies = [...formData.replies]
-                          newReplies[index].Attribute = e.target.value
+                          newReplies[index].attribute = e.target.value
                           setFormData({ ...formData, replies: newReplies })
                         }}
                         className="col-span-4"
@@ -323,10 +358,10 @@ export default function GroupsManagement() {
                       </select>
                       <Input
                         placeholder="Value"
-                        value={reply.Value}
+                        value={reply.value}
                         onChange={(e) => {
                           const newReplies = [...formData.replies]
-                          newReplies[index].Value = e.target.value
+                          newReplies[index].value = e.target.value
                           setFormData({ ...formData, replies: newReplies })
                         }}
                         className="col-span-5"
@@ -409,7 +444,7 @@ export default function GroupsManagement() {
                         <ul className="text-sm text-gray-500 space-y-1">
                           {group.checks.map((check, i) => (
                             <li key={i} className="font-mono">
-                              {check.Attribute} {check.op} {check.Value}
+                              {check.attribute} {check.op} {check.value}
                             </li>
                           ))}
                         </ul>
@@ -423,7 +458,7 @@ export default function GroupsManagement() {
                         <ul className="text-sm text-gray-500 space-y-1">
                           {group.replies.map((reply, i) => (
                             <li key={i} className="font-mono">
-                              {reply.Attribute} {reply.op} {reply.Value}
+                              {reply.attribute} {reply.op} {reply.value}
                             </li>
                           ))}
                         </ul>
