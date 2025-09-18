@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
 import { getServerSession } from "next-auth"
-
-const prisma = new PrismaClient()
 
 // GET /api/radius/reports/top-users - Get top users by usage
 export async function GET(request: NextRequest) {
@@ -14,7 +11,6 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const timeFilter = searchParams.get("time") || "7d"
     const sortBy = searchParams.get("sort") || "bandwidth"
     const limit = parseInt(searchParams.get("limit") || "10")
 
@@ -83,7 +79,7 @@ export async function GET(request: NextRequest) {
     ]
 
     // Sort based on the sortBy parameter
-    let sortedUsers = [...mockTopUsers]
+    const sortedUsers = [...mockTopUsers]
     switch (sortBy) {
       case "bandwidth":
         sortedUsers.sort((a, b) => b.total_bytes - a.total_bytes)

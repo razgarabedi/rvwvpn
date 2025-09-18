@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Users, Eye, EyeOff, Filter, RefreshCw } from "lucide-react"
+import { Search, Users, Eye, EyeOff } from "lucide-react"
 
 interface User {
   id: number
@@ -28,7 +28,6 @@ interface Group {
 }
 
 export default function SearchUsersReport() {
-  const [users, setUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(false)
@@ -74,7 +73,6 @@ export default function SearchUsersReport() {
       const response = await fetch(`/api/radius/users/search?${params}`)
       if (response.ok) {
         const data = await response.json()
-        setUsers(data)
         setFilteredUsers(data)
       } else {
         console.error("Failed to search users")

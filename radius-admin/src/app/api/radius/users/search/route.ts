@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
 import { getServerSession } from "next-auth"
-
-const prisma = new PrismaClient()
 
 // GET /api/radius/users/search - Search for users
 export async function GET(request: NextRequest) {

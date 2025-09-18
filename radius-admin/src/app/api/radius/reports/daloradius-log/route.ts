@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 
 // GET /api/radius/reports/daloradius-log - Get daloRADIUS interface log entries

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -31,7 +31,7 @@ export default function TopUsersReport() {
   const [limit, setLimit] = useState(10)
 
   // Fetch top users
-  const fetchTopUsers = async () => {
+  const fetchTopUsers = useCallback(async () => {
     try {
       setRefreshing(true)
       const params = new URLSearchParams({
@@ -53,11 +53,11 @@ export default function TopUsersReport() {
       setLoading(false)
       setRefreshing(false)
     }
-  }
+  }, [timeFilter, sortBy, limit])
 
   useEffect(() => {
     fetchTopUsers()
-  }, [timeFilter, sortBy, limit])
+  }, [timeFilter, sortBy, limit, fetchTopUsers])
 
   // Format bytes
   const formatBytes = (bytes: number) => {

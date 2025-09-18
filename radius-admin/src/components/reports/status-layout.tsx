@@ -1,16 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Server, Database, Activity, BarChart3 } from "lucide-react"
+import { Server, Database, Activity } from "lucide-react"
 import ServerStatusReport from "./server-status"
 import RADIUSStatusReport from "./radius-status"
 
 type StatusTabType = "server-status" | "radius-status"
 
-export default function StatusLayout() {
-  const [activeTab, setActiveTab] = useState<StatusTabType>("server-status")
+interface StatusLayoutProps {
+  activeTab?: StatusTabType
+}
+
+export default function StatusLayout({ activeTab: propActiveTab }: StatusLayoutProps) {
+  const [activeTab, setActiveTab] = useState<StatusTabType>(propActiveTab || "server-status")
+
+  // Update activeTab when prop changes
+  useEffect(() => {
+    if (propActiveTab) {
+      setActiveTab(propActiveTab)
+    }
+  }, [propActiveTab])
 
   const statusTabs = [
     {

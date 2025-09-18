@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { RefreshCw, Server, Cpu, HardDrive, MemoryStick, Clock, Activity, Thermometer, Wifi, Database } from "lucide-react"
+import { RefreshCw, Server, Cpu, HardDrive, MemoryStick, Clock, Activity, Thermometer, Wifi } from "lucide-react"
 
 interface ServerStatus {
   hostname: string

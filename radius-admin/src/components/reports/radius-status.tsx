@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { RefreshCw, Server, Database, Activity, CheckCircle, XCircle, AlertTriangle, Clock, Users, Wifi } from "lucide-react"
+import { RefreshCw, Server, Activity, CheckCircle, XCircle, AlertTriangle, Wifi } from "lucide-react"
 
 interface RADIUSStatus {
   freeradius: {

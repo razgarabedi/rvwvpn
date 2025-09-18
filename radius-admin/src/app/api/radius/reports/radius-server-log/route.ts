@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 
 // GET /api/radius/reports/radius-server-log - Get FreeRADIUS server log entries

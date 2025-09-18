@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, Prisma } from "@prisma/client"
 import { getServerSession } from "next-auth"
 
 const prisma = new PrismaClient()
@@ -21,7 +21,7 @@ export async function GET() {
       distinct: ['groupname'],
     });
     
-    const allGroupNames = [...new Set([...groupCheckNames.map(g => g.groupname), ...groupReplyNames.map(g => g.groupname)])]
+    const allGroupNames = [...new Set([...groupCheckNames.map((g: { groupname: string }) => g.groupname), ...groupReplyNames.map((g: { groupname: string }) => g.groupname)])]
       .sort();
 
     const groups = allGroupNames.map(name => ({ groupname: name }));
@@ -36,8 +36,8 @@ export async function GET() {
 
     const groupData = groups.map((group) => ({
       name: group.groupname,
-      checks: groupChecks.filter((check) => check.groupname === group.groupname),
-      replies: groupReplies.filter((reply) => reply.groupname === group.groupname),
+      checks: groupChecks.filter((check: { groupname: string }) => check.groupname === group.groupname),
+      replies: groupReplies.filter((reply: { groupname: string }) => reply.groupname === group.groupname),
     }));
 
     return NextResponse.json(groupData);
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Group already exists" }, { status: 409 });
     }
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const checkData = checks
         .filter((c: { attribute: string }) => c.attribute)
         .map((check: { attribute: string; op: string; value: string }) => ({
@@ -134,7 +134,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Group name is required" }, { status: 400 });
     }
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.radGroupCheck.deleteMany({ where: { groupname: name } });
       await tx.radGroupReply.deleteMany({ where: { groupname: name } });
 

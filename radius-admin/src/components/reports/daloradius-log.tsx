@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { RefreshCw, FileText, Search, Filter, Clock, User, Activity, AlertCircle, CheckCircle, XCircle } from "lucide-react"
+import { RefreshCw, FileText, Search, Clock, User, Activity, AlertCircle, CheckCircle, XCircle } from "lucide-react"
 
 interface DaloRADIUSLogEntry {
   id: number

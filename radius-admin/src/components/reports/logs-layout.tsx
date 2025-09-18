@@ -1,9 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, Server, Monitor, HardDrive, BarChart3, Activity } from "lucide-react"
+import { FileText, Server, Monitor, HardDrive, BarChart3 } from "lucide-react"
 import DaloRADIUSLogReport from "./daloradius-log"
 import RADIUSServerLogReport from "./radius-server-log"
 import SystemLogReport from "./system-log"
@@ -11,8 +10,19 @@ import BootLogReport from "./boot-log"
 
 type LogTabType = "daloradius-log" | "radius-server-log" | "system-log" | "boot-log"
 
-export default function LogsLayout() {
-  const [activeTab, setActiveTab] = useState<LogTabType>("daloradius-log")
+interface LogsLayoutProps {
+  activeTab?: LogTabType
+}
+
+export default function LogsLayout({ activeTab: propActiveTab }: LogsLayoutProps) {
+  const [activeTab, setActiveTab] = useState<LogTabType>(propActiveTab || "daloradius-log")
+
+  // Update activeTab when prop changes
+  useEffect(() => {
+    if (propActiveTab) {
+      setActiveTab(propActiveTab)
+    }
+  }, [propActiveTab])
 
   const logTabs = [
     {

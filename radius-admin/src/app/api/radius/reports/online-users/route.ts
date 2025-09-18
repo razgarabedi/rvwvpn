@@ -1,8 +1,5 @@
-import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-
-const prisma = new PrismaClient()
 
 // GET /api/radius/reports/online-users - Get currently online users
 export async function GET() {

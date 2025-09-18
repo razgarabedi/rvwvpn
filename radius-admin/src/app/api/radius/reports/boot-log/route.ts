@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 
 // GET /api/radius/reports/boot-log - Get boot log entries (dmesg)
