@@ -28,6 +28,7 @@ import NASManagement from "@/components/nas-management"
 import ServerConfig from "@/components/server-config"
 import UserSearch from "@/components/user-search"
 import QuickAddUser from "@/components/quick-add-user"
+import HotSpotManagement from "@/components/hotspot-management"
 
 type MainTabType = "management" | "reports" | "accounting" | "billing" | "gis" | "graphs" | "config" | "help"
 type SubTabType = "users" | "search-users" | "batch-users" | "hotspots" | "nas" | "user-groups" | "profiles" | "huntgroups" | "attributes" | "realm-proxy" | "ip-pool" | "server-config"
@@ -144,6 +145,12 @@ export default function RazoRADIUSLayout() {
       ]
     },
     {
+      title: "HOTSPOT MANAGEMENT",
+      items: [
+        { label: "HotSpots", icon: Wifi }
+      ]
+    },
+    {
       title: "SERVER MANAGEMENT",
       items: [
         { label: "Server Config", icon: Settings },
@@ -178,6 +185,8 @@ export default function RazoRADIUSLayout() {
         return <EnhancedUserManagement />
       case "search-users":
         return <UserSearch />
+      case "hotspots":
+        return <HotSpotManagement />
       case "user-groups":
         return <GroupsManagement />
       case "nas":
@@ -337,6 +346,8 @@ export default function RazoRADIUSLayout() {
                           setActiveSubTab("users")
                         } else if (item.label === "Search Users") {
                           setActiveSubTab("search-users")
+                        } else if (item.label === "HotSpots") {
+                          setActiveSubTab("hotspots")
                         } else if (item.label === "New User - Quick Add") {
                           setIsQuickAddOpen(true)
                         }
@@ -351,6 +362,7 @@ export default function RazoRADIUSLayout() {
                             (item.label === "User Groups" && activeSubTab === "user-groups") ||
                             (item.label === "List Users" && activeSubTab === "users") ||
                             (item.label === "Search Users" && activeSubTab === "search-users") ||
+                            (item.label === "HotSpots" && activeSubTab === "hotspots") ||
                             item.active
                               ? "bg-blue-100 text-blue-700"
                               : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
