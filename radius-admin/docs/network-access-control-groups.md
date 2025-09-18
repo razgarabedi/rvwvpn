@@ -405,7 +405,6 @@ In the `[global]` section, add or modify the `interfaces` line to include the na
 This configuration makes the Samba server accessible from both the `192.168.1.0/24` and `10.0.0.0/24` networks.
 
 -----
-
 ### \#\# 2. Restrict a Share to a Specific Interface 🔒
 
 While there isn't a direct `interface = eth1` setting for a share, you can achieve the same result by using the **`hosts allow`** parameter. This parameter filters access based on the source IP address of the client, effectively tying the share to the network connected to a specific interface.
