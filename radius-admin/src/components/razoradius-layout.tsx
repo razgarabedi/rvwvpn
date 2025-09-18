@@ -29,6 +29,7 @@ import ServerConfig from "@/components/server-config"
 import UserSearch from "@/components/user-search"
 import QuickAddUser from "@/components/quick-add-user"
 import HotSpotManagement from "@/components/hotspot-management"
+import ReportsLayout from "@/components/reports/reports-layout"
 
 type MainTabType = "management" | "reports" | "accounting" | "billing" | "gis" | "graphs" | "config" | "help"
 type SubTabType = "users" | "search-users" | "batch-users" | "hotspots" | "nas" | "user-groups" | "profiles" | "huntgroups" | "attributes" | "realm-proxy" | "ip-pool" | "server-config"
@@ -167,6 +168,10 @@ export default function RazoRADIUSLayout() {
   ]
 
   const renderContent = () => {
+    if (activeMainTab === "reports") {
+      return <ReportsLayout />
+    }
+    
     if (activeMainTab !== "management") {
       return (
         <div className="flex items-center justify-center h-64">
