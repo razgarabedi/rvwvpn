@@ -24,7 +24,10 @@ import {
   Activity,
   Trophy,
   FileText,
-  Calendar
+  Calendar,
+  Download,
+  Upload,
+  LogIn
 } from "lucide-react"
 import EnhancedUserManagement from "@/components/enhanced-user-management"
 import GroupsManagement from "@/components/groups-management"
@@ -37,6 +40,7 @@ import ReportsLayout from "@/components/reports/reports-layout"
 import AccountingLayout from "@/components/reports/accounting-layout"
 import GISLayout from "@/components/gis/gis-layout"
 import BillingLayout from "@/components/billing/billing-layout"
+import GraphsLayout from "@/components/graphs/graphs-layout"
 
 type MainTabType = "management" | "reports" | "accounting" | "billing" | "gis" | "graphs" | "config" | "help"
 type SubTabType = "users" | "search-users" | "batch-users" | "hotspots" | "nas" | "user-groups" | "profiles" | "huntgroups" | "attributes" | "realm-proxy" | "ip-pool" | "server-config"
@@ -266,11 +270,20 @@ export default function RazoRADIUSLayout() {
       case "graphs":
         return [
           {
-            title: "VISUALIZATION",
+            title: "USER GRAPHS",
             items: [
-              { label: "Usage Graphs", icon: TrendingUp, action: () => {} },
-              { label: "Performance Charts", icon: BarChart3, action: () => {} },
-              { label: "Custom Graphs", icon: Activity, action: () => {} }
+              { label: "Users Statistics", icon: Users, action: () => typeof window !== 'undefined' && (window.location.hash = "#users") },
+              { label: "Login Analytics", icon: LogIn, action: () => typeof window !== 'undefined' && (window.location.hash = "#users") },
+              { label: "Download Charts", icon: Download, action: () => typeof window !== 'undefined' && (window.location.hash = "#users") },
+              { label: "Upload Analytics", icon: Upload, action: () => typeof window !== 'undefined' && (window.location.hash = "#users") }
+            ]
+          },
+          {
+            title: "SERVER-WIDE GRAPHS",
+            items: [
+              { label: "Server Statistics", icon: Server, action: () => typeof window !== 'undefined' && (window.location.hash = "#server-wide") },
+              { label: "Logins/Hits Overview", icon: LogIn, action: () => typeof window !== 'undefined' && (window.location.hash = "#server-wide") },
+              { label: "Traffic Comparison", icon: BarChart3, action: () => typeof window !== 'undefined' && (window.location.hash = "#server-wide") }
             ]
           }
         ]
@@ -319,6 +332,10 @@ export default function RazoRADIUSLayout() {
 
     if (activeMainTab === "gis") {
       return <GISLayout />
+    }
+
+    if (activeMainTab === "graphs") {
+      return <GraphsLayout />
     }
     
     if (activeMainTab !== "management") {
