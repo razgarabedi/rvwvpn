@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Edit, Trash2, Users, Server } from "lucide-react"
+import { Plus, Edit, Trash2, Users, Server, Eye, EyeOff } from "lucide-react"
 
 interface RadUser {
   id: number
@@ -62,12 +62,12 @@ export default function EnhancedUserManagement() {
   const [formData, setFormData] = useState({ 
     username: "", 
     password: "", 
-    group: "",
-    sessionTimeout: "3600",
-    idleTimeout: "1800"
+    group: ""
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState<'users' | 'groups' | 'nas'>('users')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showPasswords, setShowPasswords] = useState<{ [key: number]: boolean }>({})
 
   // Fetch users from API
   const fetchUsers = async () => {
@@ -151,21 +151,15 @@ export default function EnhancedUserManagement() {
       })
 
       if (response.ok) {
-        // If creating a new user and group is selected, assign user to group
-        if (!editingUser && formData.group) {
+        // If group is selected, assign user to group (for both new and existing users)
+        if (formData.group) {
           await assignUserToGroup(formData.username, formData.group)
         }
-        
-        // Add user reply attributes
-        await addUserReplyAttributes(formData.username, {
-          sessionTimeout: formData.sessionTimeout,
-          idleTimeout: formData.idleTimeout
-        })
 
         await fetchUsers() // Refresh the list
         setIsDialogOpen(false)
         setEditingUser(null)
-        setFormData({ username: "", password: "", group: "", sessionTimeout: "3600", idleTimeout: "1800" })
+        setFormData({ username: "", password: "", group: "" })
       } else {
         const error = await response.json()
         alert(error.error || "Failed to save user")
@@ -201,41 +195,29 @@ export default function EnhancedUserManagement() {
     }
   }
 
-  // Add user reply attributes
-  const addUserReplyAttributes = async (username: string, attributes: { sessionTimeout: string; idleTimeout: string }) => {
-    try {
-      const response = await fetch("/api/radius/users/reply-attributes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          attributes: [
-            { attribute: "Session-Timeout", op: "=", value: attributes.sessionTimeout },
-            { attribute: "Idle-Timeout", op: "=", value: attributes.idleTimeout }
-          ]
-        }),
-      })
-
-      if (!response.ok) {
-        console.error("Failed to add user reply attributes")
-      }
-    } catch (error) {
-      console.error("Error adding user reply attributes:", error)
-    }
-  }
 
   // Handle edit user
-  const handleEdit = (user: RadUser) => {
+  const handleEdit = async (user: RadUser) => {
     setEditingUser(user)
-    setFormData({
-      username: user.username,
-      password: user.value,
-      group: "",
-      sessionTimeout: "3600",
-      idleTimeout: "1800"
-    })
+    
+    // Try to fetch user's current group
+    try {
+      // For now, we'll set default values and could enhance this later
+      // to fetch actual user group from the API
+      setFormData({
+        username: user.username,
+        password: user.value,
+        group: "" // Could be enhanced to fetch actual group
+      })
+    } catch (error) {
+      console.error("Error fetching user details:", error)
+      setFormData({
+        username: user.username,
+        password: user.value,
+        group: ""
+      })
+    }
+    
     setIsDialogOpen(true)
   }
 
@@ -265,8 +247,17 @@ export default function EnhancedUserManagement() {
   // Handle add new user
   const handleAddNew = () => {
     setEditingUser(null)
-    setFormData({ username: "", password: "", group: "", sessionTimeout: "3600", idleTimeout: "1800" })
+    setFormData({ username: "", password: "", group: "" })
+    setShowPassword(false)
     setIsDialogOpen(true)
+  }
+
+  // Toggle password visibility for table
+  const togglePasswordVisibility = (userId: number) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [userId]: !prev[userId]
+    }))
   }
 
   if (loading) {
@@ -345,7 +336,27 @@ export default function EnhancedUserManagement() {
                       <TableCell className="font-medium">{user.username}</TableCell>
                       <TableCell>{user.attribute}</TableCell>
                       <TableCell className="font-mono text-sm">
-                        {user.value.length > 10 ? `${user.value.substring(0, 10)}...` : user.value}
+                        <div className="flex items-center gap-2">
+                          <span>
+                            {showPasswords[user.id] 
+                              ? user.value 
+                              : "••••••••••"
+                            }
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => togglePasswordVisibility(user.id)}
+                          >
+                            {showPasswords[user.id] ? (
+                              <EyeOff className="h-3 w-3" />
+                            ) : (
+                              <Eye className="h-3 w-3" />
+                            )}
+                          </Button>
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -470,8 +481,8 @@ export default function EnhancedUserManagement() {
             </DialogTitle>
             <DialogDescription>
               {editingUser 
-                ? "Update the user's username and password."
-                : "Create a new RADIUS user account with group assignment and attributes."
+                ? "Update the user's username, password, and group assignment."
+                : "Create a new RADIUS user account with optional group assignment."
               }
             </DialogDescription>
           </DialogHeader>
@@ -493,60 +504,47 @@ export default function EnhancedUserManagement() {
                 <Label htmlFor="password" className="text-right">
                   Password
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="col-span-3"
-                  required
-                />
+                <div className="col-span-3 relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="pr-10"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-500" />
+                    )}
+                  </Button>
+                </div>
               </div>
-              {!editingUser && (
-                <>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="group" className="text-right">
-                      Group
-                    </Label>
-                    <Select value={formData.group} onValueChange={(value: string) => setFormData({ ...formData, group: value })}>
-                      <SelectTrigger className="col-span-3">
-                        <SelectValue placeholder="Select a group (optional)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {groups.map((group) => (
-                          <SelectItem key={group.name} value={group.name}>
-                            {group.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="sessionTimeout" className="text-right">
-                      Session Timeout
-                    </Label>
-                    <Input
-                      id="sessionTimeout"
-                      type="number"
-                      value={formData.sessionTimeout}
-                      onChange={(e) => setFormData({ ...formData, sessionTimeout: e.target.value })}
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="idleTimeout" className="text-right">
-                      Idle Timeout
-                    </Label>
-                    <Input
-                      id="idleTimeout"
-                      type="number"
-                      value={formData.idleTimeout}
-                      onChange={(e) => setFormData({ ...formData, idleTimeout: e.target.value })}
-                      className="col-span-3"
-                    />
-                  </div>
-                </>
-              )}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="group" className="text-right">
+                  Group
+                </Label>
+                <Select value={formData.group} onValueChange={(value: string) => setFormData({ ...formData, group: value })}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select a group (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {groups.map((group) => (
+                      <SelectItem key={group.name} value={group.name}>
+                        {group.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <DialogFooter>
               <Button

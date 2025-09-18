@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Edit, Trash2 } from "lucide-react"
+import { Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react"
 
 interface RadUser {
   id: number
@@ -24,6 +24,8 @@ export default function UserManagement() {
   const [editingUser, setEditingUser] = useState<RadUser | null>(null)
   const [formData, setFormData] = useState({ username: "", password: "" })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showPasswords, setShowPasswords] = useState<{ [key: number]: boolean }>({})
 
   // Fetch users from API
   const fetchUsers = async () => {
@@ -120,7 +122,16 @@ export default function UserManagement() {
   const handleAddNew = () => {
     setEditingUser(null)
     setFormData({ username: "", password: "" })
+    setShowPassword(false)
     setIsDialogOpen(true)
+  }
+
+  // Toggle password visibility for table
+  const togglePasswordVisibility = (userId: number) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [userId]: !prev[userId]
+    }))
   }
 
   if (loading) {
@@ -172,7 +183,27 @@ export default function UserManagement() {
                     <TableCell className="font-medium">{user.username}</TableCell>
                     <TableCell>{user.attribute}</TableCell>
                     <TableCell className="font-mono text-sm">
-                      {user.value.length > 10 ? `${user.value.substring(0, 10)}...` : user.value}
+                      <div className="flex items-center gap-2">
+                        <span>
+                          {showPasswords[user.id] 
+                            ? user.value 
+                            : "••••••••••"
+                          }
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={() => togglePasswordVisibility(user.id)}
+                        >
+                          {showPasswords[user.id] ? (
+                            <EyeOff className="h-3 w-3" />
+                          ) : (
+                            <Eye className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
@@ -232,14 +263,29 @@ export default function UserManagement() {
                 <Label htmlFor="password" className="text-right">
                   Password
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="col-span-3"
-                  required
-                />
+                <div className="col-span-3 relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="pr-10"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-500" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
             <DialogFooter>
