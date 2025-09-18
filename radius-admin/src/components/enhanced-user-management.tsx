@@ -4,11 +4,8 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Edit, Trash2, Users, Server, Eye, EyeOff } from "lucide-react"
+import EnhancedUserForm from "@/components/enhanced-user-form"
 
 interface RadUser {
   id: number
@@ -59,14 +56,8 @@ export default function EnhancedUserManagement() {
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<RadUser | null>(null)
-  const [formData, setFormData] = useState({ 
-    username: "", 
-    password: "", 
-    group: ""
-  })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState<'users' | 'groups' | 'nas'>('users')
-  const [showPassword, setShowPassword] = useState(false)
   const [showPasswords, setShowPasswords] = useState<{ [key: number]: boolean }>({})
 
   // Fetch users from API
@@ -128,8 +119,33 @@ export default function EnhancedUserManagement() {
   }, [])
 
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (formData: {
+    username: string
+    password: string
+    authenticationType: string
+    group: string
+    passwordType: string
+    firstName: string
+    lastName: string
+    email: string
+    phone: string
+    address: string
+    city: string
+    state: string
+    zipCode: string
+    country: string
+    billingFirstName: string
+    billingLastName: string
+    billingEmail: string
+    billingPhone: string
+    billingAddress: string
+    billingCity: string
+    billingState: string
+    billingZipCode: string
+    billingCountry: string
+    paymentMethod: string
+    customAttributes: string
+  }) => {
     setIsSubmitting(true)
 
     try {
@@ -159,7 +175,6 @@ export default function EnhancedUserManagement() {
         await fetchUsers() // Refresh the list
         setIsDialogOpen(false)
         setEditingUser(null)
-        setFormData({ username: "", password: "", group: "" })
       } else {
         const error = await response.json()
         alert(error.error || "Failed to save user")
@@ -199,25 +214,6 @@ export default function EnhancedUserManagement() {
   // Handle edit user
   const handleEdit = async (user: RadUser) => {
     setEditingUser(user)
-    
-    // Try to fetch user's current group
-    try {
-      // For now, we'll set default values and could enhance this later
-      // to fetch actual user group from the API
-      setFormData({
-        username: user.username,
-        password: user.value,
-        group: "" // Could be enhanced to fetch actual group
-      })
-    } catch (error) {
-      console.error("Error fetching user details:", error)
-      setFormData({
-        username: user.username,
-        password: user.value,
-        group: ""
-      })
-    }
-    
     setIsDialogOpen(true)
   }
 
@@ -247,8 +243,6 @@ export default function EnhancedUserManagement() {
   // Handle add new user
   const handleAddNew = () => {
     setEditingUser(null)
-    setFormData({ username: "", password: "", group: "" })
-    setShowPassword(false)
     setIsDialogOpen(true)
   }
 
@@ -472,96 +466,15 @@ export default function EnhancedUserManagement() {
         </Card>
       )}
 
-      {/* Add/Edit User Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingUser ? "Edit User" : "Add New User"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingUser 
-                ? "Update the user's username, password, and group assignment."
-                : "Create a new RADIUS user account with optional group assignment."
-              }
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="username" className="text-right">
-                  Username
-                </Label>
-                <Input
-                  id="username"
-                  value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="password" className="text-right">
-                  Password
-                </Label>
-                <div className="col-span-3 relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="pr-10"
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-500" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-500" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="group" className="text-right">
-                  Group
-                </Label>
-                <Select value={formData.group} onValueChange={(value: string) => setFormData({ ...formData, group: value })}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select a group (optional)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {groups.map((group) => (
-                      <SelectItem key={group.name} value={group.name}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsDialogOpen(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : editingUser ? "Update User" : "Create User"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Enhanced User Form */}
+      <EnhancedUserForm
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSubmit={handleSubmit}
+        editingUser={editingUser || undefined}
+        groups={groups}
+        isSubmitting={isSubmitting}
+      />
     </div>
   )
 }
