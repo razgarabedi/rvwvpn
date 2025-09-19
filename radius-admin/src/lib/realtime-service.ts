@@ -20,6 +20,12 @@ export class RealtimeService {
   connect() {
     if (this.isConnected) return;
 
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+      console.warn('Real-time service can only be used in browser environment');
+      return;
+    }
+
     try {
       this.eventSource = new EventSource('/api/radius/reports/realtime/ws');
       

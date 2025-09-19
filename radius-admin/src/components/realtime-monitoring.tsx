@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useSession } from "next-auth/react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { 
@@ -75,6 +76,7 @@ interface ActiveSession {
 }
 
 export default function RealtimeMonitoring() {
+  const { data: session, status } = useSession()
   const [realtimeData, setRealtimeData] = useState<RealtimeData | null>(null)
   const [systemMetrics, setSystemMetrics] = useState<SystemMetrics | null>(null)
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([])
@@ -108,49 +110,70 @@ export default function RealtimeMonitoring() {
   }, [])
 
   useEffect(() => {
+    // Only proceed if user is authenticated
+    if (status === 'loading') return
+    if (status === 'unauthenticated') {
+      setLoading(false)
+      return
+    }
+
     // Initial data fetch
     fetchRealtimeData()
     
-    // Set up real-time connection
-    realtimeService.connect()
-    
-    // Listen for real-time updates
-    const handleRealtimeData = (data: unknown) => {
-      if (data && typeof data === 'object' && 'type' in data && 'data' in data) {
-        const eventData = data as { type: string; data: RealtimeData }
-        if (eventData.type === 'update' && eventData.data) {
-          setRealtimeData(eventData.data)
-          setLastUpdate(new Date())
+    // Only set up real-time connection if auto-refresh is enabled and user is authenticated
+    if (autoRefresh && session) {
+      // Set up real-time connection
+      realtimeService.connect()
+      
+      // Listen for real-time updates
+      const handleRealtimeData = (data: unknown) => {
+        if (data && typeof data === 'object' && 'type' in data && 'data' in data) {
+          const eventData = data as { type: string; data: RealtimeData }
+          if (eventData.type === 'update' && eventData.data) {
+            setRealtimeData(eventData.data)
+            setLastUpdate(new Date())
+          }
+        }
+      }
+      
+      const handleConnectionStatus = (status: unknown) => {
+        console.log('Real-time connection status:', status)
+      }
+      
+      realtimeService.on('data', handleRealtimeData)
+      realtimeService.on('connected', handleConnectionStatus)
+      realtimeService.on('disconnected', handleConnectionStatus)
+      realtimeService.on('error', handleConnectionStatus)
+      
+      // Fallback polling if WebSocket is not available
+      let interval: NodeJS.Timeout | null = null
+      interval = setInterval(fetchRealtimeData, 10000) // Update every 10 seconds as fallback
+      
+      return () => {
+        realtimeService.off('data', handleRealtimeData)
+        realtimeService.off('connected', handleConnectionStatus)
+        realtimeService.off('disconnected', handleConnectionStatus)
+        realtimeService.off('error', handleConnectionStatus)
+        
+        // Disconnect the real-time service when component unmounts
+        realtimeService.disconnect()
+        
+        if (interval) {
+          clearInterval(interval)
+        }
+      }
+    } else {
+      // If auto-refresh is disabled or user not authenticated, just set up manual polling
+      let interval: NodeJS.Timeout | null = null
+      interval = setInterval(fetchRealtimeData, 30000) // Update every 30 seconds when auto-refresh is off
+      
+      return () => {
+        if (interval) {
+          clearInterval(interval)
         }
       }
     }
-    
-    const handleConnectionStatus = (status: unknown) => {
-      console.log('Real-time connection status:', status)
-    }
-    
-    realtimeService.on('data', handleRealtimeData)
-    realtimeService.on('connected', handleConnectionStatus)
-    realtimeService.on('disconnected', handleConnectionStatus)
-    realtimeService.on('error', handleConnectionStatus)
-    
-    // Fallback polling if WebSocket is not available
-    let interval: NodeJS.Timeout | null = null
-    if (autoRefresh) {
-      interval = setInterval(fetchRealtimeData, 10000) // Update every 10 seconds as fallback
-    }
-    
-    return () => {
-      realtimeService.off('data', handleRealtimeData)
-      realtimeService.off('connected', handleConnectionStatus)
-      realtimeService.off('disconnected', handleConnectionStatus)
-      realtimeService.off('error', handleConnectionStatus)
-      
-      if (interval) {
-        clearInterval(interval)
-      }
-    }
-  }, [fetchRealtimeData, autoRefresh])
+  }, [fetchRealtimeData, autoRefresh, session, status])
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 B'
@@ -187,6 +210,21 @@ export default function RealtimeMonitoring() {
             <div className="text-center">
               <RefreshCw className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
               <p className="text-gray-600">Loading real-time data...</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="space-y-6">
+        <Card className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <XCircle className="h-8 w-8 text-red-600 mx-auto mb-4" />
+              <p className="text-gray-600">Please sign in to view real-time monitoring</p>
             </div>
           </div>
         </Card>
