@@ -277,9 +277,12 @@ async function applyFreeRADIUSConfig(settings: Record<string, unknown>) {
 # Debug level: ${freeradiusSettings.debugLevel}
 # Log level: ${freeradiusSettings.logLevel}
 
+# Define log directory
+logdir = "C:\\\\Program Files\\\\FreeRADIUS\\\\var\\\\log\\\\radius"
+
 log {
   destination = ${loggingSettings.destination}
-  file = \${logdir}/radius.log
+  file = "\${logdir}/radius.log"
   syslog_facility = daemon
   stripped_names = no
   auth = ${freeradiusSettings.logLevel}
@@ -333,9 +336,12 @@ thread pool {
 # Debug level: ${freeradiusSettings.debugLevel}
 # Log level: ${freeradiusSettings.logLevel}
 
+# Define log directory
+logdir = "/var/log/freeradius"
+
 log {
   destination = ${loggingSettings.destination}
-  file = \${logdir}/radius.log
+  file = "\${logdir}/radius.log"
   syslog_facility = daemon
   stripped_names = no
   auth = ${freeradiusSettings.logLevel}
@@ -397,9 +403,12 @@ thread pool {
 # Debug level: ${freeradiusSettings.debugLevel}
 # Log level: ${freeradiusSettings.logLevel}
 
+# Define log directory
+logdir = "/usr/local/var/log/radius"
+
 log {
   destination = ${loggingSettings.destination}
-  file = \${logdir}/radius.log
+  file = "\${logdir}/radius.log"
   syslog_facility = daemon
   stripped_names = no
   auth = ${freeradiusSettings.logLevel}

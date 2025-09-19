@@ -164,9 +164,12 @@ async function resetFreeRADIUSConfig(platform: string) {
 # FreeRADIUS Configuration - Default Settings
 # Reset by Radius Admin
 
+# Define log directory
+logdir = "C:\\\\Program Files\\\\FreeRADIUS\\\\var\\\\log\\\\radius"
+
 log {
   destination = file
-  file = \${logdir}/radius.log
+  file = "\${logdir}/radius.log"
   syslog_facility = daemon
   stripped_names = no
   auth = info
@@ -223,9 +226,12 @@ thread pool {
 # FreeRADIUS Configuration - Default Settings
 # Reset by Radius Admin
 
+# Define log directory
+logdir = "/var/log/freeradius"
+
 log {
   destination = file
-  file = \${logdir}/radius.log
+  file = "\${logdir}/radius.log"
   syslog_facility = daemon
   stripped_names = no
   auth = info
@@ -290,9 +296,12 @@ thread pool {
 # FreeRADIUS Configuration - Default Settings
 # Reset by Radius Admin
 
+# Define log directory
+logdir = "/usr/local/var/log/radius"
+
 log {
   destination = file
-  file = \${logdir}/radius.log
+  file = "\${logdir}/radius.log"
   syslog_facility = daemon
   stripped_names = no
   auth = info
