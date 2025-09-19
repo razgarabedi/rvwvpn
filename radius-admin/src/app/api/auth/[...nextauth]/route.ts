@@ -5,6 +5,24 @@ import bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
 
+// Get the base URL for the application
+function getBaseUrl() {
+  // In production, use the NEXTAUTH_URL environment variable
+  if (process.env.NEXTAUTH_URL) {
+    return process.env.NEXTAUTH_URL
+  }
+  
+  // For development, use localhost
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3000'
+  }
+  
+  // Fallback: try to construct from request headers (for production)
+  return process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000'
+}
+
 const handler = NextAuth({
   providers: [
     CredentialsProvider({
@@ -64,6 +82,32 @@ const handler = NextAuth({
         session.user.email = token.email as string
       }
       return session
+    },
+    async redirect({ url }) {
+      // Get the correct base URL for the current environment
+      const correctBaseUrl = getBaseUrl()
+      
+      // Handle relative URLs - always use the correct base URL
+      if (url.startsWith("/")) {
+        return `${correctBaseUrl}${url}`
+      }
+      
+      // Handle absolute URLs - check if they're from the same origin
+      try {
+        const urlObj = new URL(url)
+        const baseUrlObj = new URL(correctBaseUrl)
+        
+        // If same origin, return the URL as-is
+        if (urlObj.origin === baseUrlObj.origin) {
+          return url
+        }
+      } catch {
+        // If URL parsing fails, treat as relative
+        return `${correctBaseUrl}${url}`
+      }
+      
+      // For external URLs, redirect to the base URL
+      return correctBaseUrl
     }
   },
   pages: {

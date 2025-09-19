@@ -4,10 +4,15 @@ import { getServerSession } from "next-auth"
 
 const prisma = new PrismaClient()
 
-// PUT /api/radius/users/[id] - Update a RADIUS user
+// Helper function to determine if param is an ID or username
+function isNumericId(param: string): boolean {
+  return !isNaN(parseInt(param)) && isFinite(parseInt(param))
+}
+
+// PUT /api/radius/users/[param] - Update a RADIUS user (by ID or username)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ param: string }> }
 ) {
   try {
     // Check authentication
@@ -17,14 +22,7 @@ export async function PUT(
     }
 
     const resolvedParams = await params
-    const userId = parseInt(resolvedParams.id)
-    if (isNaN(userId)) {
-      return NextResponse.json(
-        { error: "Invalid user ID" },
-        { status: 400 }
-      )
-    }
-
+    const param = resolvedParams.param
     const body = await request.json()
     const { username, password } = body
 
@@ -36,10 +34,28 @@ export async function PUT(
       )
     }
 
-    // Check if user exists
-    const existingUser = await prisma.radCheck.findUnique({
-      where: { id: userId }
-    })
+    let existingUser
+    let userId
+
+    if (isNumericId(param)) {
+      // Handle by ID
+      userId = parseInt(param)
+      existingUser = await prisma.radCheck.findUnique({
+        where: { id: userId }
+      })
+    } else {
+      // Handle by username
+      const decodedUsername = decodeURIComponent(param)
+      existingUser = await prisma.radCheck.findFirst({
+        where: {
+          username: decodedUsername,
+          attribute: "Cleartext-Password"
+        }
+      })
+      if (existingUser) {
+        userId = existingUser.id
+      }
+    }
 
     if (!existingUser) {
       return NextResponse.json(
@@ -85,10 +101,10 @@ export async function PUT(
   }
 }
 
-// DELETE /api/radius/users/[id] - Delete a RADIUS user
+// DELETE /api/radius/users/[param] - Delete a RADIUS user (by ID or username)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ param: string }> }
 ) {
   try {
     // Check authentication
@@ -98,18 +114,30 @@ export async function DELETE(
     }
 
     const resolvedParams = await params
-    const userId = parseInt(resolvedParams.id)
-    if (isNaN(userId)) {
-      return NextResponse.json(
-        { error: "Invalid user ID" },
-        { status: 400 }
-      )
-    }
+    const param = resolvedParams.param
 
-    // Check if user exists
-    const existingUser = await prisma.radCheck.findUnique({
-      where: { id: userId }
-    })
+    let existingUser
+    let userId
+
+    if (isNumericId(param)) {
+      // Handle by ID
+      userId = parseInt(param)
+      existingUser = await prisma.radCheck.findUnique({
+        where: { id: userId }
+      })
+    } else {
+      // Handle by username
+      const decodedUsername = decodeURIComponent(param)
+      existingUser = await prisma.radCheck.findFirst({
+        where: {
+          username: decodedUsername,
+          attribute: "Cleartext-Password"
+        }
+      })
+      if (existingUser) {
+        userId = existingUser.id
+      }
+    }
 
     if (!existingUser) {
       return NextResponse.json(

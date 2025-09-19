@@ -64,6 +64,7 @@ export default function EnhancedUserManagement() {
     password: "", 
     group: ""
   })
+  const [selectedGroup, setSelectedGroup] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState<'users' | 'groups' | 'nas'>('users')
   const [showPassword, setShowPassword] = useState(false)
@@ -127,6 +128,7 @@ export default function EnhancedUserManagement() {
     fetchAll()
   }, [])
 
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -151,15 +153,27 @@ export default function EnhancedUserManagement() {
       })
 
       if (response.ok) {
-        // If group is selected, assign user to group (for both new and existing users)
-        if (formData.group) {
-          await assignUserToGroup(formData.username, formData.group)
+        // Handle group assignment/update
+        if (editingUser) {
+          // For existing users, update group assignment
+          if (formData.group && formData.group !== "none") {
+            await updateUserGroup(formData.username, formData.group)
+          } else {
+            // Remove user from all groups if no group selected
+            await updateUserGroup(formData.username, "")
+          }
+        } else {
+          // For new users, assign to group if selected
+          if (formData.group && formData.group !== "none") {
+            await assignUserToGroup(formData.username, formData.group)
+          }
         }
 
         await fetchUsers() // Refresh the list
         setIsDialogOpen(false)
         setEditingUser(null)
-        setFormData({ username: "", password: "", group: "" })
+        setFormData({ username: "", password: "", group: "none" })
+        setSelectedGroup("none")
       } else {
         const error = await response.json()
         alert(error.error || "Failed to save user")
@@ -195,30 +209,66 @@ export default function EnhancedUserManagement() {
     }
   }
 
+  // Update user group assignment
+  const updateUserGroup = async (username: string, groupName: string) => {
+    try {
+      const response = await fetch(`/api/radius/users/${encodeURIComponent(username)}/groups`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          groupName
+        }),
+      })
+
+      if (!response.ok) {
+        console.error("Failed to update user group")
+      }
+    } catch (error) {
+      console.error("Error updating user group:", error)
+    }
+  }
+
 
   // Handle edit user
   const handleEdit = async (user: RadUser) => {
     setEditingUser(user)
     
-    // Try to fetch user's current group
+    // Set initial form data first
+    setFormData({
+      username: user.username,
+      password: user.value,
+      group: "none"
+    })
+    setSelectedGroup("none")
+    
+    // Open dialog immediately
+    setIsDialogOpen(true)
+    
+    // Fetch user's current group assignments
     try {
-      // For now, we'll set default values and could enhance this later
-      // to fetch actual user group from the API
-      setFormData({
-        username: user.username,
-        password: user.value,
-        group: "" // Could be enhanced to fetch actual group
-      })
+      const response = await fetch(`/api/radius/users/${encodeURIComponent(user.username)}/groups`)
+      let currentGroup = ""
+      
+      if (response.ok) {
+        const userGroups = await response.json()
+        // Get the first group (highest priority) if user has groups
+        if (userGroups && userGroups.length > 0) {
+          currentGroup = userGroups[0].groupname
+        }
+      }
+      
+      // Update form data with the fetched group
+      const groupValue = currentGroup || "none"
+      setFormData(prev => ({
+        ...prev,
+        group: groupValue
+      }))
+      setSelectedGroup(groupValue)
     } catch (error) {
       console.error("Error fetching user details:", error)
-      setFormData({
-        username: user.username,
-        password: user.value,
-        group: ""
-      })
     }
-    
-    setIsDialogOpen(true)
   }
 
   // Handle delete user
@@ -247,7 +297,8 @@ export default function EnhancedUserManagement() {
   // Handle add new user
   const handleAddNew = () => {
     setEditingUser(null)
-    setFormData({ username: "", password: "", group: "" })
+    setFormData({ username: "", password: "", group: "none" })
+    setSelectedGroup("none")
     setShowPassword(false)
     setIsDialogOpen(true)
   }
@@ -532,11 +583,18 @@ export default function EnhancedUserManagement() {
                 <Label htmlFor="group" className="text-right">
                   Group
                 </Label>
-                <Select value={formData.group} onValueChange={(value: string) => setFormData({ ...formData, group: value })}>
+                <Select 
+                  value={selectedGroup} 
+                  onValueChange={(value: string) => {
+                    setSelectedGroup(value)
+                    setFormData({ ...formData, group: value })
+                  }}
+                >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select a group (optional)" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">No group</SelectItem>
                     {groups.map((group) => (
                       <SelectItem key={group.name} value={group.name}>
                         {group.name}
